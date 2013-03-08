@@ -26,6 +26,7 @@ import com.sonar.sslr.api.Rule;
 public class EsqlGrammar extends LexerlessGrammar {
 
 	public Rule stringLiteral;
+	public Rule hexLiteral;
 	public Rule numericLiteral;
 	public Rule listLiteral;
 
@@ -174,6 +175,12 @@ public class EsqlGrammar extends LexerlessGrammar {
 	public Rule handlerKeyword;
 	public Rule sqlstateKeyword;
 	public Rule extractKeyword;
+	public Rule placingKeyword;
+	public Rule overlayKeyword;
+	public Rule leaveKeyword;
+	public Rule iterateKeyword;
+	public Rule resignalKeyword;
+	public Rule untilKeyword;
 	
 	
 	public Rule program;
@@ -206,7 +213,9 @@ public class EsqlGrammar extends LexerlessGrammar {
 	public Rule controlElement;
 	public Rule otherStatement;
 	public Rule declareHandlerStatement;
+	public Rule resignalStatement;
 	public Rule sqlState;
+	public Rule repeatStatement;
 
 	public Rule createStatement;
 	public Rule deleteStatement;
@@ -223,6 +232,7 @@ public class EsqlGrammar extends LexerlessGrammar {
 	public Rule passthruExpression;
 	public Rule insertExpression;
 	public Rule updateExpression;
+	public Rule iterateStatement;
 
 	public Rule qualifier;
 
@@ -242,6 +252,7 @@ public class EsqlGrammar extends LexerlessGrammar {
 	public Rule numericFunction;
 	public Rule databaseStateFunction;
 	public Rule stringManipulationFunction;
+	public Rule overlayFunction;
 	public Rule positionFunction;
 	public Rule ucaseFunction;
 	public Rule startswithFunction;
@@ -254,6 +265,7 @@ public class EsqlGrammar extends LexerlessGrammar {
 	public Rule callStatement;
 	public Rule caseStatement;
 	public Rule whenClause;
+	public Rule leaveStatement;
 	public Rule setStatement;
 	public Rule declareStatement;
 	public Rule returnStatement;

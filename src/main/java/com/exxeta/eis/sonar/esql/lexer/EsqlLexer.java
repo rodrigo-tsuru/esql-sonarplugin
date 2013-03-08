@@ -76,7 +76,7 @@ public final class EsqlLexer {
 	      + "\"([^\"\\\\]*+(\\\\[\\s\\S])?+)*+\""
 	      + "|'([^'\\\\]*+(\\\\[\\s\\S])?+)*+'"
 	      + ")";
-	  
+
   public static final String COMMENT = "(?:"
       + "--[^\\n\\r]*+"
       + "|/\\*[\\s\\S]*?\\*/"
@@ -84,6 +84,7 @@ public final class EsqlLexer {
 
   private static final String HEX_DIGIT = "[0-9a-fA-F]";
   private static final String UNICODE_ESCAPE_SEQUENCE = "u" + HEX_DIGIT + HEX_DIGIT + HEX_DIGIT + HEX_DIGIT;
+  public static final String HEX_LITERAL = "(?:X'"+HEX_DIGIT+"*+')";
 
   private static final String UNICODE_LETTER = "\\p{Lu}\\p{Ll}\\p{Lt}\\p{Lm}\\p{Lo}\\p{Nl}";
   private static final String UNICODE_COMBINING_MARK = "\\p{Mn}\\p{Mc}";
@@ -94,6 +95,8 @@ public final class EsqlLexer {
   private static final String IDENTIFIER_PART = "(?:" + IDENTIFIER_START + "|[" + UNICODE_COMBINING_MARK + UNICODE_DIGIT + UNICODE_CONNECTOR_PUNCTUATION + "])";
 
   public static final String IDENTIFIER = IDENTIFIER_START + IDENTIFIER_PART + "*+";
+
+  
 
   /**
    * Tab, Vertical Tab, Form Feed, Space, No-break space, Byte Order Mark, Any other Unicode "space separator"

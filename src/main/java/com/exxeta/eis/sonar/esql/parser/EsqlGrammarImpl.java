@@ -44,7 +44,7 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 		eos.is(firstOf(optional(semi), next(eof)));
 		lexical();
 		expression();
-		literal.is(firstOf(nullLiteral, booleanLiteral, numericLiteral, stringLiteral));
+		literal.is(firstOf(nullLiteral, booleanLiteral, numericLiteral, hexLiteral, stringLiteral));
 		nullLiteral.is(nullKeyword);
 		booleanLiteral.is(firstOf(trueKeyword, falseKeyword));
 		functionsAndPrograms();
@@ -204,6 +204,12 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 		handlerKeyword.is(keyword("HANDLER")).skip();
 		sqlstateKeyword.is(keyword("SQLSTATE")).skip();
 		extractKeyword.is(keyword("EXTRACT")).skip();
+		placingKeyword.is(keyword("PLACING")).skip();
+		overlayKeyword.is(keyword("OVERLAY")).skip();
+		leaveKeyword.is(keyword("LEAVE")).skip();
+		iterateKeyword.is(keyword("ITERATE")).skip();
+		resignalKeyword.is(keyword("RESIGNAL")).skip();
+		untilKeyword.is(keyword("UNTIL")).skip();
 	}
 
 	private void punctuators() {
@@ -277,7 +283,8 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 		letterOrDigit.is(regexp("\\p{javaJavaIdentifierPart}"));
 		numericLiteral.is(token(EsqlTokenType.NUMERIC_LITERAL, regexp(EsqlLexer.NUMERIC_LITERAL)), spacing);
 		stringLiteral.is(token(GenericTokenType.LITERAL, regexp(EsqlLexer.LITERAL)), spacing);
-		listLiteral.is(lparenthesis, literal, zeroOrMore(comma, literal), rparenthesis);
+		hexLiteral.is(token(GenericTokenType.LITERAL, regexp(EsqlLexer.HEX_LITERAL)), spacing);
+		listLiteral.is(lparenthesis, literal, zeroOrMore(sequence(comma, literal)), rparenthesis);
 		intervalLiteral.is(intervalKeyword, literal, intervalQualifier);
 		punctuators();
 		keywords();
@@ -338,13 +345,14 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 	}
 
 	private void otherStatements() {
-		otherStatement.is(declareHandlerStatement);// TODO
+		otherStatement.is(firstOf(declareHandlerStatement, resignalStatement));// TODO
 		declareHandlerStatement.is(declareKeyword, firstOf(continueKeyword, exitKeyword), handlerKeyword, forKeyword,
 				sqlState, zeroOrMore(comma, sqlState), statement);
 		sqlState.is(
 				sqlstateKeyword,
 				firstOf(sequence(likeKeyword, stringLiteral, optional(sequence(escapeKeyword, stringLiteral))),
 						sequence(optional(valueKeyword), stringLiteral)));
+		resignalStatement.is(resignalKeyword);
 	}
 
 	private void nodeInteractionStatements() {
@@ -438,12 +446,12 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 
 	private void basicStatements() {
 		basicStatement.is(firstOf(beginEndStatement, callStatement, declareStatement, setStatement, returnStatement,
-				ifStatement, throwStatement, whileStatement, caseStatement));
+				ifStatement, throwStatement, whileStatement, caseStatement, leaveStatement, iterateStatement, repeatStatement));
 		beginEndStatement
 				.is(sequence(optional(sequence(identifier, colon)), beginKeyword,
 						optional(optional(notKeyword), atomicKeyword), zeroOrMore(statement), endKeyword,
 						optional(identifier)));
-		callStatement.is(callKeyword, oneOrMore(identifier), lparenthesis, parameterList, rparenthesis,
+		callStatement.is(callKeyword, zeroOrMore(sequence(identifier,dot)),identifier, lparenthesis, parameterList, rparenthesis,
 				optional(qualifier), optional(sequence(intoKeyword, identifier)));
 		qualifier
 				.is(firstOf(sequence(inKeyword, fieldReference), sequence(externalKeyword, schemaKeyword, identifier)));
@@ -453,9 +461,9 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 				optional(expression));
 		setStatement.is(setKeyword, assignmentExpression);
 		returnStatement.is(returnKeyword, optional(logicalOrExpression));
-		ifStatement.is(ifKeyword, condition, thenKeyword, oneOrMore(statement),
-				zeroOrMore(sequence(elseifKeyword, condition, thenKeyword, oneOrMore(statement))),
-				optional(elseKeyword, oneOrMore(statement)), endKeyword, ifKeyword);
+		ifStatement.is(ifKeyword, condition, thenKeyword, zeroOrMore(statement),
+				zeroOrMore(sequence(elseifKeyword, condition, thenKeyword, zeroOrMore(statement))),
+				optional(elseKeyword, zeroOrMore(statement)), endKeyword, ifKeyword);
 		throwStatement
 				.is(throwKeyword,
 						optional(userKeyword),
@@ -466,17 +474,20 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 						optional(sequence(valuesKeyword, lparenthesis, expression, zeroOrMore(comma, expression),
 								rparenthesis)));
 		whileStatement.is(sequence(
-				firstOf(whileKeyword, sequence(identifier, colon, whileKeyword, optional(identifier))), condition,
-				doKeyword, zeroOrMore(statement), endKeyword, whileKeyword));
+				firstOf(whileKeyword, sequence(identifier, colon, whileKeyword/*, optional(identifier)*/)), condition,
+				doKeyword, zeroOrMore(statement), endKeyword, whileKeyword, optional(identifier)));
 		condition.is(expression);
 		namespace.is(identifier, optional(sequence(dot, identifier)));
 		caseStatement.is(caseKeyword, optional(expression), oneOrMore(whenClause),
-				optional(sequence(elseKeyword, oneOrMore(statement))), endKeyword, caseKeyword);
-		whenClause.is(whenKeyword, expression, thenKeyword, oneOrMore(statement));
+				optional(sequence(elseKeyword, zeroOrMore(statement))), endKeyword, caseKeyword);
+		whenClause.is(whenKeyword, expression, thenKeyword, zeroOrMore(statement));
+		leaveStatement.is(leaveKeyword, identifier);
+		iterateStatement.is(iterateKeyword, identifier);
+		repeatStatement.is(optional(sequence(identifier, colon)), repeatKeyword, zeroOrMore(statement), untilKeyword, condition, endKeyword, repeatKeyword, optional(identifier));
 	}
 
 	private void expression() {
-		primaryExpression.is(firstOf(intervalLiteral, identifier, literal, arrayLiteral, listLiteral,
+		primaryExpression.is(firstOf(intervalLiteral, literal, identifier, arrayLiteral, listLiteral,
 				sequence(lparenthesis, expression, rparenthesis)));
 		arrayLiteral.is(lbracket, zeroOrMore(firstOf(comma, assignmentExpression)), rbracket);
 		fieldReference.is(primaryExpression, zeroOrMore(sequence(dot, pathElement)));
@@ -484,7 +495,7 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 				optional(sequence(lparenthesis, primaryExpression, zeroOrMore(sequence(dot, primaryExpression)),
 						rparenthesis)),
 				optional(sequence(firstOf(namespace, sequence(lcurlybrace, expression, rcurlybrace), start), colon)),
-				firstOf(primaryExpression, sequence(lcurlybrace, expression, rcurlybrace), start, fieldName),
+				optional(firstOf(primaryExpression, sequence(lcurlybrace, expression, rcurlybrace), start, fieldName)),
 				optional(index));
 		index.is(lbracket, sequence(optional(firstOf(lt, gt)), optional(expression)), rbracket);
 
@@ -500,17 +511,17 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 		additiveExpression.is(multiplicativeExpression,
 				zeroOrMore(firstOf(plus, minus, concat), multiplicativeExpression)).skipIfOneChild();
 		relationalExpression.is(
-				additiveExpression,
+				additiveExpression,firstOf(sequence(optional(notKeyword), inKeyword, lparenthesis,additiveExpression,zeroOrMore(sequence(comma,additiveExpression)),rparenthesis),
 				zeroOrMore(
-						firstOf(lt, gt, le, ge, sequence(isKeyword, optional(notKeyword)),
-								sequence(optional(notKeyword), likeKeyword)), additiveExpression),
-				zeroOrMore(inKeyword, listLiteral)).skipIfOneChild();
+						firstOf(lt, gt, le, ge, sequence(isKeyword, optional(notKeyword)), 
+								sequence(optional(notKeyword), likeKeyword)), additiveExpression))
+				).skipIfOneChild();
 		relationalExpressionNoIn.is(
 				additiveExpression,
 				zeroOrMore(
 						firstOf(lt, gt, le, ge, sequence(isKeyword, optional(notKeyword)),
-								sequence(optional(notKeyword), likeKeyword)), additiveExpression),
-				zeroOrMore(inKeyword, listLiteral)).skipIfOneChild();
+								sequence(optional(notKeyword), likeKeyword)), additiveExpression)
+				).skipIfOneChild();
 
 		equalityExpression.is(relationalExpression, zeroOrMore(firstOf(equal, notequal), relationalExpression))
 				.skipIfOneChild();
@@ -528,7 +539,7 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 		assignmentExpression.is(
 				firstOf(sequence(leftHandSideExpression,
 						optional(firstOf(typeKeyword, namespaceKeyword, nameKeyword, valueKeyword)),
-						assignmentOperator, assignmentExpression), logicalOrExpression)).skipIfOneChild();
+						assignmentOperator, assignmentExpression, optional(intervalQualifier)), logicalOrExpression)).skipIfOneChild();
 		assignmentExpressionNoIn.is(
 				firstOf(sequence(leftHandSideExpression, assignmentOperator, assignmentExpressionNoIn),
 						logicalOrExpressionNoIn)).skipIfOneChild();
@@ -605,8 +616,11 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 	}
 
 	private void stringManipulationFunctions() {
-		stringManipulationFunction.is(firstOf(positionFunction, startswithFunction, ucaseFunction, substringFunction,
-				trimFunction));
+		stringManipulationFunction.is(firstOf(/*containsFunction, endswithFunction, leftFunction, lengthFunction, lowerFunction, lcaseFunction,
+				ltrimFunction,*/ overlayFunction, positionFunction, /*replaceFunction, replicateFunction, rightFunction rtrimFunction,
+				spaceFunction,*/ startswithFunction, substringFunction, /*translateFunction,*/ trimFunction, /*upperFunction,*/ ucaseFunction
+				));
+		overlayFunction.is(overlayKeyword, lparenthesis, expression, placingKeyword, expression, fromKeyword, expression, optional(sequence(forKeyword, expression)),rparenthesis);
 		positionFunction.is(positionKeyword, lparenthesis, expression, inKeyword, expression,
 				optional(sequence(fromKeyword, expression)), optional(sequence(repeatKeyword, expression)),
 				rparenthesis);
