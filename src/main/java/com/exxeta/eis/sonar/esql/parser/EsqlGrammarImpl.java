@@ -295,7 +295,7 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 	 */
 	private void functionsAndPrograms() {
 		program.is(spacing, optional(sequence(brokerKeyword, schemaKeyword, fieldReference)),
-				optional(sequence(pathKeyword, identifier, zeroOrMore(comma, identifier))), sourceElements, eof);
+				optional(sequence(pathKeyword, fieldReference, zeroOrMore(comma, fieldReference))), sourceElements, eof);
 		sourceElements.is(zeroOrMore(sourceElement));
 		sourceElement.is(firstOf(moduleDeclaration, routineDeclaration, declareStatement), eos);
 
