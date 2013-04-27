@@ -6,7 +6,7 @@
 	<groupId>com.exxeta.eis</groupId>
 	<artifactId>sonar-esql-plugin</artifactId>
 	<packaging>sonar-plugin</packaging>
-	<version>0.1</version>
+	<version>0.2</version>
 	<licenses>
 		<license>
 			<name>GNU Library or Lesser General Public License (LGPL)</name>

@@ -238,7 +238,8 @@ public enum EsqlKeyword implements TokenType {
 	ASBITSTREAM("ASBITSTREAM"),
 	BROKER("BROKER"),
 	EXTRACT("EXTRACT"),
-	OVERLAY("OVERLAY");
+	OVERLAY("OVERLAY"),
+	QUARTER("QUARTER");
 	
 private final String value;
 

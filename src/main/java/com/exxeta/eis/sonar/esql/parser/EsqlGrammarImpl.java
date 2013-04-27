@@ -38,6 +38,7 @@ import com.exxeta.eis.sonar.esql.api.EsqlPunctuator;
 import com.exxeta.eis.sonar.esql.api.EsqlTokenType;
 import com.exxeta.eis.sonar.esql.lexer.EsqlLexer;
 import com.sonar.sslr.api.GenericTokenType;
+import com.sonar.sslr.api.Rule;
 
 public class EsqlGrammarImpl extends EsqlGrammar {
 	public EsqlGrammarImpl() {
@@ -159,6 +160,17 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 		hourKeyword.is(keyword("HOUR")).skip();
 		minuteKeyword.is(keyword("MINUTE")).skip();
 		secondKeyword.is(keyword("SECOND")).skip();
+		dayofweekKeyword.is(keyword("DAYOFWEEK")).skip();
+		monthsKeyword.is(keyword("MONTHS")).skip();
+		quarterKeyword.is(keyword("QUARTER")).skip();
+		quartersKeyword.is(keyword("QUARTERS")).skip();
+		weeksKeyword.is(keyword("WEEKS")).skip();
+		weekOfYearKeyword.is(keyword("WEEKOFYEAR")).skip();
+		weekOfMonthKeyword.is(keyword("WEEKOFMONTH")).skip();
+		isLeapYearKeyweord.is(keyword("ISLEAPYEAR")).skip();
+		daysKeyword.is(keyword("DAYS")).skip();
+		dayOfYearKeyword.is(keyword("DAYOFYEAR")).skip();
+
 		forKeyword.is(keyword("FOR")).skip();
 		upperKeyword.is(keyword("UPPER")).skip();
 		ucaseKeyword.is(keyword("UCASE")).skip();
@@ -176,7 +188,7 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 		positionKeyword.is(keyword("POSITION")).skip();
 		throwKeyword.is(keyword("THROW")).skip();
 		userKeyword.is(keyword("USER")).skip();
-		severityKeyword.is(keyword("USER")).skip();
+		severityKeyword.is(keyword("SEVERITY")).skip();
 		catalogKeyword.is(keyword("CATALOG")).skip();
 		valuesKeyword.is(keyword("VALUES")).skip();
 		asbitstreamKeyword.is(keyword("ASBITSTREAM")).skip();
@@ -581,7 +593,7 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 	 */
 	private void datetimeFunctions() {
 		datetimeFunction.is(firstOf(extractFunction));
-		extractFunction.is(extractKeyword, lparenthesis, firstOf(yearKeyword, monthKeyword, dayKeyword, hourKeyword, minuteKeyword, secondKeyword, "DAYS", "DAYOFYEAR", "DAYOFWEEK", "MONTHS", "QUARTEROFYEAR", "QUARTERS", "WEEKS", "WEEKOFYEAR", "WEEKOFMONTH", "ISLEAPYEAR"), fromKeyword, expression, rparenthesis);
+		extractFunction.is(extractKeyword, lparenthesis, firstOf(daysKeyword, dayOfYearKeyword, dayofweekKeyword, yearKeyword, monthKeyword, dayKeyword, hourKeyword, minuteKeyword, secondKeyword,  monthsKeyword, quarterKeyword, quartersKeyword, weeksKeyword, weekOfYearKeyword, weekOfMonthKeyword, isLeapYearKeyweord), fromKeyword, expression, rparenthesis);
 		//The other function do not need to be specified.
 	}
 

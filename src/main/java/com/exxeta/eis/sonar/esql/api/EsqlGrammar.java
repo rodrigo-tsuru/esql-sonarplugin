@@ -202,6 +202,17 @@ public class EsqlGrammar extends LexerlessGrammar {
 	public Rule hourKeyword;
 	public Rule minuteKeyword;
 	public Rule secondKeyword;
+	public Rule dayofweekKeyword;
+
+	public Rule monthsKeyword;
+	public Rule quarterKeyword;
+	public Rule quartersKeyword;
+	public Rule weeksKeyword;
+	public Rule weekOfYearKeyword;
+	public Rule weekOfMonthKeyword;
+	public Rule isLeapYearKeyweord;
+	public Rule daysKeyword;
+	public Rule dayOfYearKeyword;
 
 	public Rule statement;
 	public Rule basicStatement;
