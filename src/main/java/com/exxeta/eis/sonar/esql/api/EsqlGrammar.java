@@ -181,6 +181,12 @@ public class EsqlGrammar extends LexerlessGrammar {
 	public Rule iterateKeyword;
 	public Rule resignalKeyword;
 	public Rule untilKeyword;
+	public Rule logKeyword;
+	public Rule eventKeyword;
+	public Rule traceKeyword;
+	public Rule fullKeyword;
+	public Rule loopKeyword;
+	
 	
 	
 	public Rule program;
@@ -227,6 +233,9 @@ public class EsqlGrammar extends LexerlessGrammar {
 	public Rule resignalStatement;
 	public Rule sqlState;
 	public Rule repeatStatement;
+	public Rule logStatement;
+	public Rule logOptions;
+	public Rule loopStatement;
 
 	public Rule createStatement;
 	public Rule deleteStatement;

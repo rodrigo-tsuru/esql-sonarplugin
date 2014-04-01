@@ -46,7 +46,7 @@ public final class CheckList {
 //        EqEqEqCheck.class,
 //        CommentRegularExpressionCheck.class,
 //        EvalCheck.class,
-//        OneStatementPerLineCheck.class,
+        OneStatementPerLineCheck.class,
 //        SemicolonCheck.class,
 //        AlwaysUseCurlyBracesCheck.class,
 //        MultilineStringLiteralsCheck.class,
@@ -85,6 +85,7 @@ public final class CheckList {
 //        MissingNewlineAtEndOfFileCheck.class,
 //        BoundOrAssignedEvalOrArgumentsCheck.class,
 //        SameNameForFunctionAndVariableCheck.class,
+        CommentRegularExpressionCheck.class,
         NestedIfDepthCheck.class);
   }
 

@@ -55,7 +55,7 @@ public class EsqlProfileTest {
     assertThat(profile.getName()).isEqualTo(RulesProfile.SONAR_WAY_NAME);
     List<ActiveRule> a = profile.getActiveRulesByRepository(CheckList.REPOSITORY_KEY);
     assertThat(profile.getActiveRulesByRepository(CheckList.REPOSITORY_KEY))
-        .hasSize(2);
+        .hasSize(4);
     assertThat(validation.hasErrors()).isFalse();
   }
 

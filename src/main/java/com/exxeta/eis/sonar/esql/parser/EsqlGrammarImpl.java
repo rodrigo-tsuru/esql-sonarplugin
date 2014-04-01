@@ -38,7 +38,6 @@ import com.exxeta.eis.sonar.esql.api.EsqlPunctuator;
 import com.exxeta.eis.sonar.esql.api.EsqlTokenType;
 import com.exxeta.eis.sonar.esql.lexer.EsqlLexer;
 import com.sonar.sslr.api.GenericTokenType;
-import com.sonar.sslr.api.Rule;
 
 public class EsqlGrammarImpl extends EsqlGrammar {
 	public EsqlGrammarImpl() {
@@ -222,6 +221,13 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 		iterateKeyword.is(keyword("ITERATE")).skip();
 		resignalKeyword.is(keyword("RESIGNAL")).skip();
 		untilKeyword.is(keyword("UNTIL")).skip();
+		logKeyword.is(keyword("LOG")).skip();
+		eventKeyword.is(keyword("EVENT")).skip();
+		traceKeyword.is(keyword("TRACE")).skip();
+		fullKeyword.is(keyword("FULL")).skip();
+		loopKeyword.is(keyword("LOOP")).skip();
+		
+		
 	}
 
 	private void punctuators() {
@@ -357,13 +363,15 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 	}
 
 	private void otherStatements() {
-		otherStatement.is(firstOf(declareHandlerStatement, resignalStatement));// TODO
+		otherStatement.is(firstOf(declareHandlerStatement, logStatement, resignalStatement));// TODO
 		declareHandlerStatement.is(declareKeyword, firstOf(continueKeyword, exitKeyword), handlerKeyword, forKeyword,
 				sqlState, zeroOrMore(comma, sqlState), statement);
 		sqlState.is(
 				sqlstateKeyword,
 				firstOf(sequence(likeKeyword, stringLiteral, optional(sequence(escapeKeyword, stringLiteral))),
 						sequence(optional(valueKeyword), stringLiteral)));
+		logStatement.is(logKeyword, firstOf(eventKeyword, sequence(userKeyword, traceKeyword)), optional(sequence(optional(fullKeyword), exceptionKeyword)), optional(logOptions), optional(valuesKeyword, lparenthesis, expression, zeroOrMore(sequence(comma, expression)), rparenthesis ));
+		logOptions.is(sequence(optional(sequence(severityKeyword, expression)), optional(sequence(catalogKeyword, expression)), optional(sequence(messageKeyword, expression))));
 		resignalStatement.is(resignalKeyword);
 	}
 
@@ -457,8 +465,9 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 	}
 
 	private void basicStatements() {
-		basicStatement.is(firstOf(beginEndStatement, callStatement, declareStatement, setStatement, returnStatement,
-				ifStatement, throwStatement, whileStatement, caseStatement, leaveStatement, iterateStatement, repeatStatement));
+		basicStatement.is(firstOf(beginEndStatement, callStatement, caseStatement, declareStatement, ifStatement, 
+				iterateStatement, leaveStatement, loopStatement, repeatStatement, returnStatement, setStatement,
+				throwStatement, whileStatement));
 		beginEndStatement
 				.is(sequence(optional(sequence(identifier, colon)), beginKeyword,
 						optional(optional(notKeyword), atomicKeyword), zeroOrMore(statement), endKeyword,
@@ -476,6 +485,7 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 		ifStatement.is(ifKeyword, condition, thenKeyword, zeroOrMore(statement),
 				zeroOrMore(sequence(elseifKeyword, condition, thenKeyword, zeroOrMore(statement))),
 				optional(elseKeyword, zeroOrMore(statement)), endKeyword, ifKeyword);
+		loopStatement.is(firstOf(sequence(loopKeyword, zeroOrMore(statement), endKeyword, loopKeyword),sequence(identifier, colon, loopKeyword, zeroOrMore(statement), endKeyword, loopKeyword, identifier)));
 		throwStatement
 				.is(throwKeyword,
 						optional(userKeyword),
@@ -506,7 +516,7 @@ public class EsqlGrammarImpl extends EsqlGrammar {
 		pathElement.is(
 				optional(sequence(lparenthesis, primaryExpression, zeroOrMore(sequence(dot, primaryExpression)),
 						rparenthesis)),
-				optional(sequence(firstOf(namespace, sequence(lcurlybrace, expression, rcurlybrace), start), colon)),
+				optional(sequence(optional(firstOf(namespace, sequence(lcurlybrace, expression, rcurlybrace), start)), colon)),
 				optional(firstOf(primaryExpression, sequence(lcurlybrace, expression, rcurlybrace), start, fieldName)),
 				optional(index));
 		index.is(lbracket, sequence(optional(firstOf(lt, gt)), optional(expression)), rbracket);
